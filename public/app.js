@@ -1,4 +1,8 @@
 // State Management
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? ''
+  : 'http://localhost:5000';
+
 let connectionData = [];
 let baselineData = [];
 let activeTab = 'all'; // 'all', 'anomalies', 'baseline'
@@ -76,7 +80,7 @@ function setupEventListeners() {
 // Check Backend connectivity
 async function checkApiStatus() {
   try {
-    const res = await fetch('/api/baseline');
+    const res = await fetch(`${API_BASE}/api/baseline`);
     if (res.ok) {
       apiStatusText.innerText = 'Connected';
       apiStatusText.className = 'status-val text-green';
@@ -93,7 +97,7 @@ async function checkApiStatus() {
 // Fetch Trusted Baseline
 async function fetchBaseline() {
   try {
-    const res = await fetch('/api/baseline');
+    const res = await fetch(`${API_BASE}/api/baseline`);
     const data = await res.json();
     if (data.success) {
       baselineData = data.baseline;
@@ -128,7 +132,7 @@ async function triggerScan() {
   }, 100);
 
   try {
-    const res = await fetch('/api/scan');
+    const res = await fetch(`${API_BASE}/api/scan`);
     const result = await res.json();
     
     clearInterval(interval);
@@ -396,7 +400,7 @@ function renderBaselineList() {
 // Add configuration to trust baseline
 async function addToBaseline(port, process, protocol) {
   try {
-    const res = await fetch('/api/baseline', {
+    const res = await fetch(`${API_BASE}/api/baseline`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ port, process, protocol })
@@ -436,7 +440,7 @@ async function addToBaseline(port, process, protocol) {
 // Remove configuration from baseline
 async function removeFromBaseline(port, process, protocol) {
   try {
-    const res = await fetch('/api/baseline', {
+    const res = await fetch(`${API_BASE}/api/baseline`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ port, process, protocol })
@@ -497,7 +501,7 @@ async function executeKillProcess() {
   closeModal();
   
   try {
-    const res = await fetch('/api/kill', {
+    const res = await fetch(`${API_BASE}/api/kill`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pid })

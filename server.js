@@ -10,6 +10,14 @@ const BASELINE_PATH = path.join(__dirname, 'baseline.json');
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// CORS middleware to allow local scans from Netlify domain
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  next();
+});
+
 // Known common/malicious ports to flag
 const DANGEROUS_PORTS = {
   21: 'FTP (Often unencrypted, target for brute force)',
