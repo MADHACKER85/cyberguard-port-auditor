@@ -193,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   updateApiUrlDisplay();
   checkApiStatus();
-  fetchBaseline();
 });
 
 // Navigation Setup
@@ -273,9 +272,8 @@ async function saveApiConfig() {
   closeApiModal();
   showToast('API Configuration Saved', 'Attempting to reconnect...', 'info');
   
-  // Test connection
-  await checkApiStatus();
-  fetchBaseline();
+  // Test connection and load baseline
+  checkApiStatus();
 }
 
 async function resetApiConfig() {
@@ -288,8 +286,7 @@ async function resetApiConfig() {
   closeApiModal();
   showToast('API Reset to Default', 'Reconnecting to standard localhost server...', 'info');
   
-  await checkApiStatus();
-  fetchBaseline();
+  checkApiStatus();
 }
 
 // Check Backend connectivity
@@ -301,6 +298,15 @@ async function checkApiStatus() {
       if (demoBanner) demoBanner.style.display = 'none';
       apiStatusText.innerText = 'Connected';
       apiStatusText.className = 'status-val text-green';
+      
+      const data = await res.json();
+      if (data.success) {
+        baselineData = data.baseline;
+        updateStats();
+        if (activeTab === 'baseline') {
+          renderDashboard();
+        }
+      }
     } else {
       throw new Error();
     }
