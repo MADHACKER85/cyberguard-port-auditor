@@ -80,6 +80,13 @@
           <span class="status-label">API Status:</span>
           <span class="status-val text-green" id="api-status">Connecting...</span>
         </div>
+        <div class="status-row" style="flex-direction: column; gap: 4px; margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px;">
+          <span class="status-label" style="font-size: 0.72rem;">API Server Address:</span>
+          <span class="status-val" id="api-url-display" style="word-break: break-all; font-size: 0.75rem; font-family: monospace; color: #94a3b8;">http://localhost:5000</span>
+        </div>
+        <button class="btn btn-secondary" id="btn-configure-api" style="width: 100%; height: 28px; padding: 0; font-size: 0.72rem; justify-content: center; margin-top: 8px; border-radius: 6px;">
+          Configure API Server
+        </button>
       </div>
     </aside>
 
@@ -281,7 +288,7 @@
       </div>
       <div class="modal-body">
         <p>You are about to force-terminate the following running process configuration. This action might crash
-          dependent applications or cause server instability.</p>
+        dependent applications or cause server instability.</p>
         <div class="target-process-detail">
           <div class="detail-row">
             <span class="detail-lbl">Process Name:</span>
@@ -297,11 +304,43 @@
           </div>
         </div>
         <p class="text-note text-warning">Note: System-critical processes might require running this scanner API from an
-          Elevated Administrator console to be successfully terminated.</p>
+        Elevated Administrator console to be successfully terminated.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="kill-modal-cancel">Abort Action</button>
         <button class="btn btn-danger" id="kill-modal-confirm">Confirm Force Kill</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Configuration Modal -->
+  <div class="modal-backdrop" id="api-modal" style="display: none;">
+    <div class="modal-card" style="border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 10px 40px rgba(0, 240, 255, 0.15);">
+      <div class="modal-header" style="background: rgba(0, 240, 255, 0.03);">
+        <span class="modal-title" style="color: var(--color-cyan);">BACKEND API CONFIGURATION</span>
+        <button class="modal-close-btn" id="api-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>CyberGuard requires a connection to the backend API server running locally on your computer to perform scans and terminate threat processes.</p>
+        
+        <div style="margin: 20px 0;">
+          <label for="api-url-input" style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">API SERVER URL</label>
+          <input type="text" id="api-url-input" style="width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: #fff; border-radius: 8px; padding: 10px 12px; font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: var(--transition-fast);" placeholder="e.g. http://localhost:5000">
+        </div>
+        
+        <div class="text-note" style="font-size: 0.78rem; line-height: 1.45; color: #94a3b8; border-left-color: var(--color-cyan);">
+          <strong style="color: #e2e8f0;">Connection Checklist:</strong>
+          <ul style="margin-top: 6px; margin-left: 16px; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+            <li>Ensure the backend is running locally (run <code>npm start</code> or <code>node server.js</code> in the project folder).</li>
+            <li>Ensure the port matches the server's listening port (default is <code>5000</code>).</li>
+            <li><strong>Browser Blockages:</strong> If loading CyberGuard over HTTPS (such as on Netlify), browsers like Chrome, Edge, and Firefox exempt <code>localhost</code> from Mixed Content policies, but Safari blocks it entirely. If you have connection failures, try using Chrome/Edge.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="api-modal-reset" style="margin-right: auto; background: rgba(0, 240, 255, 0.05); border-color: rgba(0, 240, 255, 0.15); color: var(--color-cyan);">Reset Default</button>
+        <button class="btn btn-secondary" id="api-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="api-modal-save">Save & Reconnect</button>
       </div>
     </div>
   </div>

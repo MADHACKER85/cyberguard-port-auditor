@@ -1,7 +1,6 @@
 // State Management
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? ''
-  : 'http://localhost:5000';
+const DEFAULT_API_BASE = window.location.port === '5000' ? '' : 'http://localhost:5000';
+let API_BASE = localStorage.getItem('cyberguard_api_base') || DEFAULT_API_BASE;
 
 let connectionData = [];
 let baselineData = [];
@@ -22,6 +21,16 @@ const progressBar = document.getElementById('scan-progress-bar');
 const progressPercentage = document.getElementById('scan-progress-percentage');
 const lastUpdatedText = document.getElementById('last-updated-text');
 const apiStatusText = document.getElementById('api-status');
+const apiUrlDisplay = document.getElementById('api-url-display');
+
+// API Modal Elements
+const btnConfigureApi = document.getElementById('btn-configure-api');
+const apiModal = document.getElementById('api-modal');
+const apiUrlInput = document.getElementById('api-url-input');
+const btnApiModalSave = document.getElementById('api-modal-save');
+const btnApiModalCancel = document.getElementById('api-modal-cancel');
+const btnApiModalReset = document.getElementById('api-modal-reset');
+const btnApiModalClose = document.getElementById('api-modal-close-btn');
 
 // Counter Stats Elements
 const statTotalPorts = document.getElementById('stat-total-ports');
@@ -45,6 +54,7 @@ const btnCloseModal = document.getElementById('modal-cancel-btn');
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupEventListeners();
+  updateApiUrlDisplay();
   checkApiStatus();
   fetchBaseline();
 });
@@ -75,6 +85,73 @@ function setupEventListeners() {
   btnCancelKill.addEventListener('click', closeModal);
   btnCloseModal.addEventListener('click', closeModal);
   btnConfirmKill.addEventListener('click', executeKillProcess);
+
+  // API Modal actions
+  if (btnConfigureApi) btnConfigureApi.addEventListener('click', openApiModal);
+  if (btnApiModalCancel) btnApiModalCancel.addEventListener('click', closeApiModal);
+  if (btnApiModalClose) btnApiModalClose.addEventListener('click', closeApiModal);
+  if (btnApiModalReset) btnApiModalReset.addEventListener('click', resetApiConfig);
+  if (btnApiModalSave) btnApiModalSave.addEventListener('click', saveApiConfig);
+}
+
+// Update API Server display text
+function updateApiUrlDisplay() {
+  if (apiUrlDisplay) {
+    apiUrlDisplay.innerText = API_BASE || `${window.location.protocol}//${window.location.host}`;
+  }
+}
+
+// API Config Modal Actions
+function openApiModal() {
+  if (apiUrlInput) {
+    apiUrlInput.value = API_BASE || DEFAULT_API_BASE;
+  }
+  if (apiModal) {
+    apiModal.style.display = 'flex';
+  }
+}
+
+function closeApiModal() {
+  if (apiModal) {
+    apiModal.style.display = 'none';
+  }
+}
+
+async function saveApiConfig() {
+  let val = apiUrlInput.value.trim();
+  if (val) {
+    // Strip trailing slash if present
+    if (val.endsWith('/')) {
+      val = val.slice(0, -1);
+    }
+    API_BASE = val;
+    localStorage.setItem('cyberguard_api_base', val);
+  } else {
+    API_BASE = DEFAULT_API_BASE;
+    localStorage.removeItem('cyberguard_api_base');
+  }
+  
+  updateApiUrlDisplay();
+  closeApiModal();
+  showToast('API Configuration Saved', 'Attempting to reconnect...', 'info');
+  
+  // Test connection
+  await checkApiStatus();
+  fetchBaseline();
+}
+
+async function resetApiConfig() {
+  API_BASE = DEFAULT_API_BASE;
+  localStorage.removeItem('cyberguard_api_base');
+  if (apiUrlInput) {
+    apiUrlInput.value = API_BASE;
+  }
+  updateApiUrlDisplay();
+  closeApiModal();
+  showToast('API Reset to Default', 'Reconnecting to standard localhost server...', 'info');
+  
+  await checkApiStatus();
+  fetchBaseline();
 }
 
 // Check Backend connectivity
