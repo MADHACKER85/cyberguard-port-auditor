@@ -7,6 +7,139 @@ let baselineData = [];
 let activeTab = 'all'; // 'all', 'anomalies', 'baseline'
 let selectedProcessToKill = null;
 
+let isDemoMode = false;
+
+// Pre-defined default mock data for Sandbox Demo Mode
+const DEFAULT_MOCK_BASELINE = [
+  { port: 3000, process: 'node.exe', protocol: 'TCP', addedAt: new Date().toISOString() },
+  { port: 8080, process: 'chrome.exe', protocol: 'TCP', addedAt: new Date().toISOString() }
+];
+
+const DEFAULT_MOCK_CONNECTIONS = [
+  {
+    port: 135,
+    protocol: 'TCP',
+    localIp: '0.0.0.0',
+    pid: 996,
+    state: 'LISTENING',
+    processName: 'svchost.exe',
+    isLocalOnly: false,
+    baselined: false,
+    severity: 'medium',
+    anomalies: [
+      {
+        type: 'baseline_drift',
+        severity: 'low',
+        message: 'This process & port configuration is not in the trusted baseline.',
+        suggestion: 'If this application is authorized, click "Trust Configuration" to whitelist it. Otherwise, investigate or terminate this process.'
+      },
+      {
+        type: 'external_binding',
+        severity: 'medium',
+        message: 'Listens on public interface (0.0.0.0). Exposed to external network.',
+        suggestion: 'Configure the application to bind to "127.0.0.1" (localhost) instead of "0.0.0.0" to prevent exposure to external devices.'
+      }
+    ]
+  },
+  {
+    port: 3000,
+    protocol: 'TCP',
+    localIp: '127.0.0.1',
+    pid: 14322,
+    state: 'LISTENING',
+    processName: 'node.exe',
+    isLocalOnly: true,
+    baselined: true,
+    severity: 'info',
+    anomalies: []
+  },
+  {
+    port: 3306,
+    protocol: 'TCP',
+    localIp: '0.0.0.0',
+    pid: 2411,
+    state: 'LISTENING',
+    processName: 'mysqld.exe',
+    isLocalOnly: false,
+    baselined: false,
+    severity: 'medium',
+    anomalies: [
+      {
+        type: 'baseline_drift',
+        severity: 'low',
+        message: 'This process & port configuration is not in the trusted baseline.',
+        suggestion: 'If this database server is authorised, trust it. Otherwise audit who instantiated it.'
+      },
+      {
+        type: 'external_binding',
+        severity: 'medium',
+        message: 'Listens on public interface (0.0.0.0). Exposed to external network.',
+        suggestion: 'Configure MySQL to bind to "127.0.0.1" to restrict access only to the local machine.'
+      },
+      {
+        type: 'dangerous_port',
+        severity: 'medium',
+        message: 'High-risk port active: 3306 - MySQL (Database port, target for exploitation)',
+        suggestion: 'Ensure strong authentication is configured and network firewall rules restrict external access.'
+      }
+    ]
+  },
+  {
+    port: 4444,
+    protocol: 'TCP',
+    localIp: '0.0.0.0',
+    pid: 21010,
+    state: 'LISTENING',
+    processName: 'unknown.exe',
+    isLocalOnly: false,
+    baselined: false,
+    severity: 'high',
+    anomalies: [
+      {
+        type: 'baseline_drift',
+        severity: 'low',
+        message: 'This process & port configuration is not in the trusted baseline.',
+        suggestion: 'This process is unrecognized. Investigate immediately.'
+      },
+      {
+        type: 'external_binding',
+        severity: 'medium',
+        message: 'Listens on public interface (0.0.0.0). Exposed to external network.',
+        suggestion: 'Close the port immediately.'
+      },
+      {
+        type: 'dangerous_port',
+        severity: 'high',
+        message: 'High-risk port active: 4444 - Metasploit default listener (Commonly malicious)',
+        suggestion: 'Terminate the process using "Kill Process" or block inbound port 4444 traffic via Windows Firewall.'
+      }
+    ]
+  },
+  {
+    port: 5357,
+    protocol: 'UDP',
+    localIp: '[::]',
+    pid: 4,
+    state: 'LISTENING (UDP)',
+    processName: 'System',
+    isLocalOnly: false,
+    baselined: false,
+    severity: 'low',
+    anomalies: [
+      {
+        type: 'baseline_drift',
+        severity: 'low',
+        message: 'This process & port configuration is not in the trusted baseline.',
+        suggestion: 'System-level network listener. Safe if Microsoft WSD/discovery is required.'
+      }
+    ]
+  }
+];
+
+let mockConnections = [];
+let mockBaseline = [...DEFAULT_MOCK_BASELINE];
+let killedPids = [];
+
 // DOM Elements
 const btnScan = document.getElementById('btn-scan');
 const btnRefreshBaseline = document.getElementById('btn-refresh-baseline');
@@ -31,6 +164,10 @@ const btnApiModalSave = document.getElementById('api-modal-save');
 const btnApiModalCancel = document.getElementById('api-modal-cancel');
 const btnApiModalReset = document.getElementById('api-modal-reset');
 const btnApiModalClose = document.getElementById('api-modal-close-btn');
+
+// Demo Banner Elements
+const demoBanner = document.getElementById('demo-banner');
+const btnBannerConnect = document.getElementById('btn-banner-connect');
 
 // Counter Stats Elements
 const statTotalPorts = document.getElementById('stat-total-ports');
@@ -92,6 +229,7 @@ function setupEventListeners() {
   if (btnApiModalClose) btnApiModalClose.addEventListener('click', closeApiModal);
   if (btnApiModalReset) btnApiModalReset.addEventListener('click', resetApiConfig);
   if (btnApiModalSave) btnApiModalSave.addEventListener('click', saveApiConfig);
+  if (btnBannerConnect) btnBannerConnect.addEventListener('click', openApiModal);
 }
 
 // Update API Server display text
@@ -159,20 +297,40 @@ async function checkApiStatus() {
   try {
     const res = await fetch(`${API_BASE}/api/baseline`);
     if (res.ok) {
+      isDemoMode = false;
+      if (demoBanner) demoBanner.style.display = 'none';
       apiStatusText.innerText = 'Connected';
       apiStatusText.className = 'status-val text-green';
     } else {
       throw new Error();
     }
   } catch (err) {
-    apiStatusText.innerText = 'Offline';
-    apiStatusText.className = 'status-val text-danger';
-    showToast('Connection Refused', 'Cannot communicate with backend API server.', 'danger');
+    isDemoMode = true;
+    if (demoBanner) demoBanner.style.display = 'flex';
+    apiStatusText.innerText = 'Demo Mode (Simulated)';
+    apiStatusText.className = 'status-val text-warning';
+    
+    // Load mock baseline into display list
+    baselineData = mockBaseline;
+    updateStats();
+    renderDashboard();
+    
+    showToast('Demo Mode Active', 'Backend is offline. Running with simulated data.', 'warning');
   }
 }
 
 // Fetch Trusted Baseline
 async function fetchBaseline() {
+  if (isDemoMode) {
+    baselineData = mockBaseline;
+    updateStats();
+    if (activeTab === 'baseline') {
+      renderDashboard();
+    }
+    showToast('Baseline Loaded', `Loaded ${baselineData.length} trusted profiles. (Simulated)`, 'success');
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/baseline`);
     const data = await res.json();
@@ -207,6 +365,68 @@ async function triggerScan() {
       progressPercentage.innerText = `${progress}%`;
     }
   }, 100);
+
+  if (isDemoMode) {
+    setTimeout(() => {
+      clearInterval(interval);
+      progressBar.style.width = '100%';
+      progressPercentage.innerText = '100%';
+      
+      // Load mock connections dynamically based on mock baseline, filtering out killed processes
+      mockConnections = JSON.parse(JSON.stringify(DEFAULT_MOCK_CONNECTIONS))
+        .filter(item => !killedPids.includes(item.pid))
+        .map(item => {
+          const isBaselined = mockBaseline.some(b => 
+            b.port === item.port && 
+            b.process.toLowerCase() === item.processName.toLowerCase() && 
+            b.protocol.toUpperCase() === item.protocol.toUpperCase()
+          );
+          
+          let anomalies = item.anomalies;
+          if (isBaselined) {
+            anomalies = anomalies.filter(anom => anom.type !== 'baseline_drift');
+          } else {
+            if (!anomalies.some(anom => anom.type === 'baseline_drift')) {
+              anomalies.push({
+                type: 'baseline_drift',
+                severity: 'low',
+                message: 'This process & port configuration is not in the trusted baseline.',
+                suggestion: 'If this application is authorized, click "Trust Configuration" to whitelist it.'
+              });
+            }
+          }
+          
+          let maxSeverity = 'info';
+          if (anomalies.length > 0) {
+            if (anomalies.some(a => a.severity === 'high')) maxSeverity = 'high';
+            else if (anomalies.some(a => a.severity === 'medium')) maxSeverity = 'medium';
+            else maxSeverity = 'low';
+          }
+          
+          return {
+            ...item,
+            baselined: isBaselined,
+            anomalies: anomalies,
+            severity: maxSeverity
+          };
+        });
+      
+      connectionData = mockConnections;
+      
+      const scanDate = new Date();
+      lastUpdatedText.innerText = `Last Scan: ${scanDate.toLocaleTimeString()} (Simulated)`;
+      
+      updateStats();
+      renderDashboard();
+      showToast('Audit Completed', `Discovered ${connectionData.length} active listeners. (Simulated)`, 'success');
+      
+      setTimeout(() => {
+        progressContainer.style.display = 'none';
+        btnScan.disabled = false;
+      }, 800);
+    }, 1200);
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/scan`);
@@ -476,6 +696,45 @@ function renderBaselineList() {
 
 // Add configuration to trust baseline
 async function addToBaseline(port, process, protocol) {
+  if (isDemoMode) {
+    const exists = mockBaseline.some(item => 
+      item.port === parseInt(port, 10) && 
+      item.process.toLowerCase() === process.toLowerCase() && 
+      item.protocol.toUpperCase() === protocol.toUpperCase()
+    );
+
+    if (!exists) {
+      mockBaseline.push({
+        port: parseInt(port, 10),
+        process: process,
+        protocol: protocol.toUpperCase(),
+        addedAt: new Date().toISOString()
+      });
+    }
+
+    showToast('Baseline Updated', `Successfully trusted ${process} on port ${port}. (Simulated)`, 'success');
+    
+    // Update local baseline copy
+    baselineData = mockBaseline;
+    
+    // Update scan records to show item is now trusted
+    connectionData = connectionData.map(item => {
+      if (item.port === port && item.processName === process && item.protocol === protocol) {
+        return {
+          ...item,
+          baselined: true,
+          severity: item.severity === 'low' && item.anomalies.length === 1 ? 'info' : item.severity,
+          anomalies: item.anomalies.filter(anom => anom.type !== 'baseline_drift')
+        };
+      }
+      return item;
+    });
+
+    updateStats();
+    renderDashboard();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/baseline`, {
       method: 'POST',
@@ -516,6 +775,30 @@ async function addToBaseline(port, process, protocol) {
 
 // Remove configuration from baseline
 async function removeFromBaseline(port, process, protocol) {
+  if (isDemoMode) {
+    mockBaseline = mockBaseline.filter(item => 
+      !(item.port === port && item.process.toLowerCase() === process.toLowerCase() && item.protocol.toUpperCase() === protocol.toUpperCase())
+    );
+
+    showToast('Baseline Removed', `Removed trust profile for ${process}. (Simulated)`, 'success');
+    
+    baselineData = mockBaseline;
+
+    connectionData = connectionData.map(item => {
+      if (item.port === port && item.processName === process && item.protocol === protocol) {
+        return {
+          ...item,
+          baselined: false
+        };
+      }
+      return item;
+    });
+    
+    updateStats();
+    renderDashboard();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/baseline`, {
       method: 'DELETE',
@@ -577,6 +860,20 @@ async function executeKillProcess() {
   
   closeModal();
   
+  if (isDemoMode) {
+    showToast('Process Terminated', `Forced kill on PID ${pid} completed. (Simulated)`, 'success');
+    
+    // Add to killed pids to exclude it from future mock scans
+    killedPids.push(pid);
+    
+    // Update local ports dataset (remove connections tied to this PID)
+    connectionData = connectionData.filter(item => item.pid !== pid);
+    
+    updateStats();
+    renderDashboard();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/kill`, {
       method: 'POST',

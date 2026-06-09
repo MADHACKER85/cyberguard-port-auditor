@@ -117,6 +117,24 @@
         </div>
       </header>
 
+      <!-- Demo Mode Informative Banner (Shown when backend is offline) -->
+      <div class="demo-mode-banner" id="demo-banner" style="display: none; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 12px; padding: 14px 20px; align-items: center; gap: 16px; box-shadow: 0 4px 15px rgba(0, 240, 255, 0.03); transition: all 0.3s ease;">
+        <div style="background: rgba(0, 240, 255, 0.1); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--color-cyan); flex-shrink: 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div style="flex-grow: 1;">
+          <h4 style="font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 2px;">Running in Sandbox Demo Mode</h4>
+          <p style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
+            Your local port scanner backend is currently offline. You are exploring with **simulated data**. To monitor your actual physical machine sockets, start the backend locally and connect.
+          </p>
+        </div>
+        <button class="btn btn-secondary" id="btn-banner-connect" style="height: 32px; padding: 0 14px; font-size: 0.75rem; border-color: rgba(0, 240, 255, 0.25); background: rgba(0, 240, 255, 0.05); color: var(--color-cyan); border-radius: 6px;">
+          Connect Local Backend
+        </button>
+      </div>
+
       <!-- Stats Grid -->
       <section class="stats-grid">
         <!-- Stat Card 1 -->
