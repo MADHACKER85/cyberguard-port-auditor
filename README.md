@@ -2,6 +2,13 @@
 
 CyberGuard is a premium, interactive cybersecurity utility for Windows. It audits active listening network sockets, resolves their owning process trees (PIDs & names), flags security anomalies, and enables quick threat mitigation directly from a glassmorphic dashboard interface.
 
+## Live Demo
+
+🚀 Experience the live interactive dashboard: **[cyberguard-port-auditor.netlify.app](https://cyberguard-port-auditor.netlify.app)**
+
+> [!NOTE]
+> Because CyberGuard audits your local physical machine's network sockets, the Netlify-hosted dashboard requires the backend scanner to be running locally on your computer (`http://localhost:5000`) to trigger live audits.
+
 ---
 
 ## Key Features
