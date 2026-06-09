@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberGuard // Network Port & Anomaly Auditor</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Ambient background glow spots -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>CYBER<span>GUARD</span></h1>
+          <span class="subtitle">PORT AUDITOR v1.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-btn active" data-tab="all">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" />
+            <rect x="14" y="3" width="7" height="5" />
+            <rect x="14" y="12" width="7" height="9" />
+            <rect x="3" y="16" width="7" height="5" />
+          </svg>
+          All Connections
+        </button>
+        <button class="nav-btn" data-tab="anomalies">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Anomalies Detected
+          <span class="badge badge-alert" id="anomaly-badge">0</span>
+        </button>
+        <button class="nav-btn" data-tab="baseline">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          Trusted Baseline
+        </button>
+      </nav>
+
+      <div class="system-status">
+        <div class="status-header">SYSTEM INFRASTRUCTURE</div>
+        <div class="status-row">
+          <span class="status-label">Host Platform:</span>
+          <span class="status-val">Windows Host</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Active Port Scanner:</span>
+          <span class="status-val text-cyan">Netstat/Tasklist</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">API Status:</span>
+          <span class="status-val text-green" id="api-status">Connecting...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <h2>Security Overview</h2>
+          <p class="text-muted" id="last-updated-text">Audit baseline active. No scan initiated.</p>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-secondary" id="btn-refresh-baseline">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            Reload Baseline
+          </button>
+          <button class="btn btn-primary" id="btn-scan">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Scan Now
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats Grid -->
+      <section class="stats-grid">
+        <!-- Stat Card 1 -->
+        <div class="stat-card">
+          <div class="card-glass-glow"></div>
+          <div class="stat-icon bg-cyan-dim text-cyan">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+              <line x1="6" y1="6" x2="6.01" y2="6" />
+              <line x1="6" y1="18" x2="6.01" y2="18" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Listening Ports</span>
+            <div class="stat-value" id="stat-total-ports">--</div>
+          </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="stat-card border-danger">
+          <div class="card-glass-glow"></div>
+          <div class="stat-icon bg-danger-dim text-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Anomalies Detected</span>
+            <div class="stat-value text-danger" id="stat-anomalies">--</div>
+          </div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="stat-card">
+          <div class="card-glass-glow"></div>
+          <div class="stat-icon bg-warning-dim text-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">External Bindings</span>
+            <div class="stat-value text-warning" id="stat-external-binds">--</div>
+          </div>
+        </div>
+
+        <!-- Stat Card 4 -->
+        <div class="stat-card">
+          <div class="card-glass-glow"></div>
+          <div class="stat-icon bg-success-dim text-success">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Trusted Baseline Ratio</span>
+            <div class="stat-value text-success" id="stat-baseline-ratio">--</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scanning Progress Panel (Hidden by default) -->
+      <div class="scan-loading-panel" id="scan-progress-container" style="display: none;">
+        <div class="progress-details">
+          <span class="progress-title">Performing network socket audit...</span>
+          <span class="progress-percent" id="scan-progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="scan-progress-bar"></div>
+        </div>
+      </div>
+
+      <!-- Main Audit Logs Card -->
+      <div class="card audit-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h3 id="panel-title">Active Connection Audit Logs</h3>
+            <span class="badge" id="panel-count-badge">0 connections</span>
+          </div>
+          <div class="card-header-right">
+            <div class="search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" id="search-input" placeholder="Search by port, PID, process...">
+            </div>
+            <select class="filter-dropdown" id="severity-filter">
+              <option value="all">All Severities</option>
+              <option value="high">High Only</option>
+              <option value="medium">Medium & Above</option>
+              <option value="low">Anomalies Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <!-- Main Port scanning table -->
+          <table class="audit-table" id="ports-table">
+            <thead>
+              <tr>
+                <th>Port</th>
+                <th>Protocol</th>
+                <th>Process Details</th>
+                <th>Local Address</th>
+                <th>Risk Profile</th>
+                <th class="actions-col">Audit Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ports-tbody">
+              <tr>
+                <td colspan="6" class="table-placeholder">
+                  <div class="placeholder-content">
+                    <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <p>No audit data found. Click <strong>"Scan Now"</strong> above to parse sockets and discover
+                      potential system anomalies.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Trusted Baseline Configuration Table (Hidden initially) -->
+          <table class="audit-table" id="baseline-table" style="display: none;">
+            <thead>
+              <tr>
+                <th>Trusted Port</th>
+                <th>Protocol</th>
+                <th>Process Identifier</th>
+                <th>Configuration Date</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="baseline-tbody">
+              <!-- Rendered programmatically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- App Footer containing copyright -->
+      <footer class="app-footer">
+        <p>&copy; 2026 Keerthivasan Krishnamoorthy❤️. All Rights Reserved. Use of this utility is subject to
+          authorization policies.</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Confirmation modal for Process Termination -->
+  <div class="modal-backdrop" id="kill-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">TERMINATE PROCESS WARNING</span>
+        <button class="modal-close-btn" id="modal-cancel-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>You are about to force-terminate the following running process configuration. This action might crash
+          dependent applications or cause server instability.</p>
+        <div class="target-process-detail">
+          <div class="detail-row">
+            <span class="detail-lbl">Process Name:</span>
+            <strong class="detail-val" id="kill-process-name">svchost.exe</strong>
+          </div>
+          <div class="detail-row">
+            <span class="detail-lbl">Process ID (PID):</span>
+            <strong class="detail-val text-danger" id="kill-process-pid">4192</strong>
+          </div>
+          <div class="detail-row">
+            <span class="detail-lbl">Active Port:</span>
+            <strong class="detail-val text-cyan" id="kill-process-port">TCP 135</strong>
+          </div>
+        </div>
+        <p class="text-note text-warning">Note: System-critical processes might require running this scanner API from an
+          Elevated Administrator console to be successfully terminated.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="kill-modal-cancel">Abort Action</button>
+        <button class="btn btn-danger" id="kill-modal-confirm">Confirm Force Kill</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JavaScript file -->
+  <script src="app.js"></script>
+  <!-- Custom cursor and mouse fluid glow script -->
+  <script src="cursor.js"></script>
+</body>
+
+</html>

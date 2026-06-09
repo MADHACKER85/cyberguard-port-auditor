@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberGuard // Next-Gen Local Port & Anomaly Auditor</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Live Interactive Network Background -->
+  <canvas id="live-bg-canvas" class="live-bg-canvas"></canvas>
+  
+  <!-- Ambient background glow spots -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Landing page container -->
+  <div class="landing-wrapper">
+    <!-- Navbar -->
+    <header class="landing-nav">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="logo-text">
+          <h1>CYBER<span>GUARD</span></h1>
+          <span class="subtitle">PORT AUDITOR v1.0</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#features" class="nav-link-item">Key Features</a>
+        <a href="#baseline" class="nav-link-item">Baseline Engine</a>
+        <a href="dashboard.html" class="btn btn-primary btn-launch-nav">
+          Launch Console
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <span class="cyber-badge">SECURE HOST ENVIRONMENT</span>
+        <h1 class="hero-title">Continuous Port Auditing & Anomaly Intelligence</h1>
+        <p class="hero-desc">
+          CyberGuard monitors active sockets on your host machine, maps network binds to running process trees, detects exposure anomalies, and enables quick threat mitigation in a single dashboard.
+        </p>
+        <div class="hero-actions">
+          <a href="dashboard.html" class="btn btn-primary btn-hero-cta">
+            Launch Security Console
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="#features" class="btn btn-secondary btn-hero-explore">
+            Explore Features
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="carousel-container">
+          <div class="carousel-track-wrapper">
+            <div class="carousel-track" id="carousel-track">
+              <!-- Slide 1: Terminal Sockets mapping Mockup -->
+              <div class="carousel-slide active">
+                <div class="slide-visual">
+                  <div class="visual-mockup terminal-mockup">
+                    <div class="terminal-header">
+                      <span class="dot red"></span>
+                      <span class="dot yellow"></span>
+                      <span class="dot green"></span>
+                      <span class="terminal-title">Active Sockets Audit</span>
+                    </div>
+                    <div class="terminal-body">
+                      <p class="cmd">> netstat -ano | findstr LISTENING</p>
+                      <p class="res"><span class="lbl-proto">TCP</span> 0.0.0.0:135 <span class="lbl-state">LISTENING</span> <span class="lbl-pid">PID 996 (svchost.exe)</span></p>
+                      <p class="res"><span class="lbl-proto">TCP</span> 127.0.0.1:3000 <span class="lbl-state">LISTENING</span> <span class="lbl-pid">PID 14322 (node.exe)</span></p>
+                      <p class="res warning"><span class="lbl-proto">TCP</span> 0.0.0.0:4444 <span class="lbl-state">LISTENING</span> <span class="lbl-pid">PID 21010 (unknown.exe) [⚠️ ANOMALY]</span></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-info">
+                  <h3>Socket Audit System</h3>
+                  <p>Instantly scans Windows sockets and maps listening ports to owning PIDs and processes.</p>
+                </div>
+              </div>
+              
+              <!-- Slide 2: Alert Anomaly detail Mockup -->
+              <div class="carousel-slide">
+                <div class="slide-visual">
+                  <div class="visual-mockup alert-mockup">
+                    <div class="alert-header">ANOMALY PROFILE: DANGEROUS_PORT</div>
+                    <div class="alert-details">
+                      <div class="alert-row"><span>Target Port:</span> <span class="text-danger">4444</span></div>
+                      <div class="alert-row"><span>Protocol:</span> <span>TCP</span></div>
+                      <div class="alert-row"><span>Risk Classification:</span> <span class="risk-badge high">HIGH RISK</span></div>
+                      <div class="alert-desc">Metasploit default listener signature detected. Exposure threat matches known exploitation tools.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-info">
+                  <h3>Anomaly Threat Engine</h3>
+                  <p>Analyzes exposure vectors, flags public bindings, and reports critical threat profiles.</p>
+                </div>
+              </div>
+
+              <!-- Slide 3: Whitelist Baseline Rules Mockup -->
+              <div class="carousel-slide">
+                <div class="slide-visual">
+                  <div class="visual-mockup baseline-mockup">
+                    <div class="baseline-header">WHITELIST BASELINE REGISTER</div>
+                    <div class="baseline-body">
+                      <div class="rules-list">
+                        <div class="rule-item trusted"><span>Port 3000 (node.exe)</span> <span class="status-trusted">TRUSTED</span></div>
+                        <div class="rule-item trusted"><span>Port 8080 (chrome.exe)</span> <span class="status-trusted">TRUSTED</span></div>
+                        <div class="rule-item drift"><span>Port 4444 (unknown.exe)</span> <span class="status-drift">UNTRUSTED</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="slide-info">
+                  <h3>Adaptive Whitelisting</h3>
+                  <p>Define trusted service baselines to filter out routine ports and eliminate alarm noise.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Carousel Controls -->
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" id="carousel-prev-btn">&larr;</button>
+            <div class="carousel-dots" id="carousel-dots-container"></div>
+            <button class="carousel-btn next" id="carousel-next-btn">&rarr;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+      <div class="section-header">
+        <span class="cyber-badge-dim">AUDIT CAPABILITIES</span>
+        <h2>Designed to expose local network vulnerabilities</h2>
+        <p class="text-muted">An elegant stack built to monitor listening sockets, identify system drift, and secure endpoints.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="card-glass-glow"></div>
+          <div class="feature-icon bg-cyan-dim text-cyan">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <h3>Socket & Process Audits</h3>
+          <p>Instantly scans listening TCP/UDP ports and correlates them to active system PIDs and executable file names.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="card-glass-glow"></div>
+          <div class="feature-icon bg-danger-dim text-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3>Anomaly Intelligence</h3>
+          <p>Flags public network exposures, known malware listeners, database port bindings, and baseline drift configurations.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="card-glass-glow"></div>
+          <div class="feature-icon bg-warning-dim text-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <h3>Active Mitigation</h3>
+          <p>Allows security administrators to force-terminate suspicious or unauthorized processes directly from the console interface.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Baseline Section -->
+    <section class="baseline-highlight-section" id="baseline">
+      <div class="baseline-card">
+        <div class="card-glass-glow"></div>
+        <div class="baseline-content">
+          <span class="cyber-badge">NOISE REDUCTION</span>
+          <h2>Adaptive Configuration Baselines</h2>
+          <p>
+            Tired of alarm fatigue? CyberGuard's baseline engine remembers trusted port-process pairings. Simply trust verified developers, and only newly opened sockets or configuration shifts will trigger notifications in future scans.
+          </p>
+          <div class="baseline-action">
+            <a href="dashboard.html" class="btn btn-primary">
+              Try Whitelisting Now
+              <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="baseline-code-visual">
+          <pre><code>{
+  <span class="key">"trusted_rules"</span>: [
+    {
+      <span class="key">"port"</span>: <span class="num">3000</span>,
+      <span class="key">"process"</span>: <span class="val">"node.exe"</span>,
+      <span class="key">"protocol"</span>: <span class="val">"TCP"</span>
+    },
+    {
+      <span class="key">"port"</span>: <span class="num">135</span>,
+      <span class="key">"process"</span>: <span class="val">"svchost.exe"</span>,
+      <span class="key">"protocol"</span>: <span class="val">"TCP"</span>
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-bottom">
+        <p class="copyright">&copy; 2026 Keerthivasan Krishnamoorthy❤️. All Rights Reserved. Use of this utility is subject to authorization policies.</p>
+        <p class="tech-stack text-muted">Node.js // Express // Windows Shell Core</p>
+      </div>
+    </footer>
+  </div>
+  <!-- Custom cursor and mouse fluid glow script -->
+  <script src="cursor.js"></script>
+  <!-- Landing page logic (interactive background, carousel) -->
+  <script src="landing.js"></script>
+</body>
+</html>
